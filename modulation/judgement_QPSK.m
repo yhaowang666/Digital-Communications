@@ -1,11 +1,11 @@
-function [y]=judgement_QPSK2(r_c,r_s)
+function [y]=judgement_QPSK(r_c,r_s)
 N=length(r_c);M=2*N;
 y_c=zeros(1,N);y_s=zeros(1,N);
 for i=1:N
-    a=(r_c(i)-1)^2+(r_s(i)-0)^2;
-    b=(r_c(i)-0)^2+(r_s(i)-1)^2;
-    c=(r_c(i)+1)^2+(r_s(i)-0)^2;
-    d=(r_c(i)-0)^2+(r_s(i)+1)^2;
+    a=(r_c(i)-sqrt(2)/2)^2+(r_s(i)-sqrt(2)/2)^2;
+    b=(r_c(i)+sqrt(2)/2)^2+(r_s(i)-sqrt(2)/2)^2;
+    c=(r_c(i)+sqrt(2)/2)^2+(r_s(i)+sqrt(2)/2)^2;
+    d=(r_c(i)-sqrt(2)/2)^2+(r_s(i)+sqrt(2)/2)^2;
     e=min([a,b,c,d]);
     if a==e
         y_c(i)=0;y_s(i)=0;

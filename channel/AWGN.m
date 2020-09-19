@@ -2,7 +2,7 @@ clc;clear all;close all;
 
 N=1000;
 s = source(N); %信源产生，序列个数为N
-Eb = 1;
+Eb = 1/2;
 mu = 0;
 SNR = [5,10,15,20];
 N0 = Eb./(power(10,SNR/10));
@@ -22,6 +22,6 @@ for i =1:length(sigma)
     r_c = s_c + n_c;r_s = s_s + n_s;
     figure(i)
     scatter(r_c,r_s)
-    title(sprintf('SNR = %d',SNR(i)));
+    title(sprintf('AWGN,SNR = %d',SNR(i)));
 end
 

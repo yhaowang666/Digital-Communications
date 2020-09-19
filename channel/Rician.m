@@ -2,7 +2,7 @@ clc;clear all;close all;
 
 N=1000;
 s = source(N); %信源产生，序列个数为N
-Eb = 1;
+Eb = 1/2;
 mu = 0;
 SNR = 15;
 N0 = Eb./(power(10,SNR/10));
@@ -20,14 +20,18 @@ for i =1:length(sigma)
     
     [s_c1,s_s1] = QPSK(s1_c,s1_s);     %进行QPSK编码
     
-    B = 1;
-    R = raylrnd(B,2,N/2);              %产生B = 0.6的瑞利信号，其中 u = B/sqrt(pi/2)
-    R1 = R(1,:);R2 = R(2,:);
-    s_c = s_c1.*R1;s_s = s_s1.*R2;
+    B = 0.6;
+    K = [5,10,15,20];
+    for j = 1:length(K)
+        r = raylrnd(B,2,N/2);   %产生B = 0.6的瑞利信号，其中 u = B/sqrt(pi/2)
+        R = ones(2,N/2).*sqrt(K(j)/(K(j)+1)) + r.*sqrt(1/(K(j)+1));
+        R1 = R(1,:);R2 = R(2,:);
+        s_c = s_c1.*R1;s_s = s_s1.*R2;
     
-    r_c = s_c + n_c;r_s = s_s + n_s;
-    figure(i)
-    scatter(r_c,r_s)
-    title(sprintf('Rayleigh,SNR = %d',SNR(i)));
+        r_c = s_c + n_c;r_s = s_s + n_s;
+        figure(j)
+        scatter(r_c,r_s)
+    	title(sprintf('Rician,SNR = %d,K = %d',SNR(i),K(j)));
+    end
 end
 

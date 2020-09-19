@@ -1,6 +1,6 @@
 clc;clear all;close all;
 SNR=-5:1:20;          
-N=60000;
+N=600000;
 s=source(N);   %信源产生
 % 
 % %QPSK调制
