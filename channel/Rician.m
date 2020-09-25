@@ -23,10 +23,13 @@ for i =1:length(sigma)
     B = 0.6;
     K = [5,10,15,20];
     for j = 1:length(K)
-        r = raylrnd(B,2,N/2);   %产生B = 0.6的瑞利信号，其中 u = B/sqrt(pi/2)
-        R = ones(2,N/2).*sqrt(K(j)/(K(j)+1)) + r.*sqrt(1/(K(j)+1));
-        R1 = R(1,:);R2 = R(2,:);
-        s_c = s_c1.*R1;s_s = s_s1.*R2;
+        r = normrnd(0,sqrt(1/2),2,N/2);   % 产生瑞利乘性噪声
+        h = zeros(2,N/2);
+        %h = ones(2,N/2).*sqrt(K(j)/(K(j)+1)) + r.*sqrt(1/(K(j)+1));
+        h(1,:) = ones(1,N/2).*sqrt(K(j)/(K(j)+1)) + r(1,:).*sqrt(1/(K(j)+1));
+        h(2,:) = r(2,:).*sqrt(1/(K(j)+1));
+        h_i = h(1,:);h_q = h(2,:);
+        s_c = s_c1.*h_i - s_s1.*h_q ;s_s = s_c1.*h_q + s_s1.*h_i;
     
         r_c = s_c + n_c;r_s = s_s + n_s;
         figure(j)
