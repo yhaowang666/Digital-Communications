@@ -27,7 +27,7 @@ for i=1:N
     m = min(x);
     for j = 1:16
         if x(j) == m
-            berak;
+            break;
         end
     end
     

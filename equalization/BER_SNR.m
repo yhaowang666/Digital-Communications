@@ -7,7 +7,7 @@ s = source(N); %信源产生，序列个数为N
 
 Eb = (2*sqrt(2)+sqrt(10))/4;%16QAM每个比特能量
 mu = 0;
-SNR = -5 : 0.1 : 10;
+SNR = -5 :1 : 20;
 BER = zeros(1,length(SNR));
 N0 = Eb./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
@@ -32,7 +32,7 @@ for i = 1:length(sigma)
 end
 
 
-semilogy(SNR,BER,'-*k');
+semilogy(SNR,BER,'-b*');
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
@@ -54,8 +54,15 @@ for i = 1:length(sigma)
         s1_s(c) = s(2*c);
     end                     %将信源分解成双路信号
     
-    [s_c,s_s] = QPSK(s1_c,s1_s);     %进行QPSK编码
+    [s_c1,s_s1] = QPSK(s1_c,s1_s);     %进行QPSK编码
+    
+    h = normrnd(0,sqrt(1/2),2,N/2);              %产生瑞利乘性噪声
+    h_i = h(1,:);h_q = h(2,:);
+    s_c = s_c1.*h_i - s_s1.*h_q ;s_s = s_c1.*h_q + s_s1.*h_i;
+    
     r_c = s_c + n_c;r_s = s_s + n_s;
+    
+   %c = force_zero(h_i ,5);
     
     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
     BER(i) = error_rate(s,y);        %%求误比特率
