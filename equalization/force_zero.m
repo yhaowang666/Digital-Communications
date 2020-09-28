@@ -16,6 +16,7 @@ else
     end
 end
 l=max(MID-1,H-MID);
+
 %根据给定抽头数确定冲击序列x
 %x=[h(-2N) h(-2N+1) ... h(0) ... h(2N-1) h(2N)]
 x=zeros(1,4*N+1);

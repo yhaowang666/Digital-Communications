@@ -22,6 +22,8 @@ for i =1:length(sigma)
     r_c = s_c + n_c;r_s = s_s + n_s;
     figure(i)
     scatter(r_c,r_s)
+    xlabel('In-phase');
+    ylabel('Quadrature-phase');
     title(sprintf('AWGN,SNR = %d',SNR(i)));
 end
 
