@@ -2,27 +2,27 @@ clc;clear all;
 
 
 N=1000;
-s = source(N); %ĞÅÔ´²úÉú£¬ĞòÁĞ¸öÊıÎªN
-Eb = 1;
+s = source(N); %ä¿¡æºäº§ç”Ÿï¼Œåºåˆ—ä¸ªæ•°ä¸ºN
+Eb = 1/2;
 mu = 0;
 SNR = 15;
 N0 = Eb./(power(10,SNR/10));
-sigma = sqrt(N0/2); %¼ÆËãÔëÉùµÄ±ê×¼²î
+sigma = sqrt(N0/2); %è®¡ç®—å™ªå£°çš„æ ‡å‡†å·®
 
 for i =1:length(sigma)
-    n = normrnd(mu,sigma(i),2,N/2);   %²úÉú·ş´Ó¸ßË¹·Ö²¼µÄË«Â·ÔëÉù
+    n = normrnd(mu,sigma(i),2,N/2);   %äº§ç”Ÿæœä»é«˜æ–¯åˆ†å¸ƒçš„åŒè·¯å™ªå£°
     n_c=n(1,:);n_s=n(2,:);
     s1_c=zeros(1,N/2);s1_s=zeros(1,N/2);
 
     for c=1:N/2
         s1_c(c)=s(2*c-1);
         s1_s(c)=s(2*c);
-    end                     %½«ĞÅÔ´·Ö½â³ÉË«Â·ĞÅºÅ
+    end                     %å°†ä¿¡æºåˆ†è§£æˆåŒè·¯ä¿¡å·
     
-    [s_c1,s_s1] = QPSK(s1_c,s1_s);     %½øĞĞQPSK±àÂë
+    [s_c1,s_s1] = QPSK(s1_c,s1_s);     %è¿›è¡ŒQPSKç¼–ç 
     
 
-    h = normrnd(0,sqrt(1/2),2,N/2);              %²úÉúÈğÀû³ËĞÔÔëÉù
+    h = normrnd(0,sqrt(1/2),2,N/2);              %äº§ç”Ÿç‘åˆ©ä¹˜æ€§å™ªå£°
     h_i = h(1,:);h_q = h(2,:);
     s_c = s_c1.*h_i - s_s1.*h_q ;s_s = s_c1.*h_q + s_s1.*h_i;
     
