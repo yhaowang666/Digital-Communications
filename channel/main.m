@@ -1,0 +1,3 @@
+AWGN
+Rayleigh
+Rician
