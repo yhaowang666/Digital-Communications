@@ -2,7 +2,7 @@ clc;clear all;close all;
 
 N=1000;
 s = source(N); %信源产生，序列个数为N
-Eb = 1;
+Eb = 1/2;
 mu = 0;
 SNR = 15;
 N0 = Eb./(power(10,SNR/10));
