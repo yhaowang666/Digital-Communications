@@ -1,5 +1,4 @@
 clc;clear all;
-close all;
 
 N=1000;
 s = source(N); %信源产生，序列个数为N
@@ -32,7 +31,7 @@ for i =1:length(sigma)
         s_c = s_c1.*h_i - s_s1.*h_q ;s_s = s_c1.*h_q + s_s1.*h_i;
         
         r_c = s_c + n_c;r_s = s_s + n_s;
-        figure(j)
+        figure(j+5)
         scatter(r_c,r_s)
         xlabel('In-phase');
         ylabel('Quadrature-phase');
