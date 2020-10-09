@@ -5,12 +5,13 @@ s = source(N); %信源产生，序列个数为N
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %16QAM
 
-Es = (2*sqrt(2)+sqrt(10));%16QAM每个符号能量
+Eb = (2*sqrt(2)+sqrt(10))/4;%16QAM每个比特能量
 mu = 0;
-SNR = -5 :1 :20;
-SER = zeros(1,length(SNR));
-N0 = Es./(power(10,SNR/10));
+SNR = 0 :1 : 16;
+BER = zeros(1,length(SNR));
+N0 = Eb./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
+
 
 for i = 1:length(sigma)
     n = normrnd(mu,sigma(i),[2,N/4]);   %产生服从高斯分布的双路噪声
@@ -28,20 +29,22 @@ for i = 1:length(sigma)
     r_c = s_c + n_c;r_s = s_s + n_s;
     
     y = judgement_16QAM(r_c,r_s);     %%16QAM解码，判决输出
-    SER(i) = symbol_error_16QAM(s,y);        %%求误符号率
+    BER(i) = error_rate(s,y);        %%求误比特率
 end
 
 
-semilogy(SNR,SER,'b*');
+semilogy(SNR,BER,'b*');
+axis([0 16 1 10])
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
 title('BER-SNR,AWGN');
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %QPSK
-Es = 1;%QPSK每个符号能量为1
-N0 = Es./(power(10,SNR/10));
+Eb = 1/2;%QPSK每个比特能量为1/2
+N0 = Eb./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
 
 for i = 1:length(sigma)
@@ -58,10 +61,16 @@ for i = 1:length(sigma)
     r_c = s_c + n_c;r_s = s_s + n_s;
     
     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
-    SER(i) = symbol_error_QPSK(s,y);        %%求误符号率
+    BER(i) = error_rate(s,y);        %%求误比特率
 end
 
 
-semilogy(SNR,SER,'rs');
+semilogy(SNR,BER,'rs');
 hold on;
-legend('16QAM','QPSK');
+
+BER_true = erfc(sqrt(Eb./N0))/2; %QPSK理想误比特率
+semilogy(SNR,BER_true,'-y');
+hold on
+
+legend('16QAM simulated','QPSK simulated','QPSK theoretical');
+
