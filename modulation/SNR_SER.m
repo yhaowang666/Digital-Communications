@@ -5,11 +5,11 @@ s = source(N); %信源产生，序列个数为N
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %16QAM
 
-Eb = (2*sqrt(2)+sqrt(10))/4;%16QAM每个比特能量
+Es = (2*sqrt(2)+sqrt(10))/4;%16QAM每个符号能量
 mu = 0;
 SNR = -5 :1 :20;
 SER = zeros(1,length(SNR));
-N0 = Eb./(power(10,SNR/10));
+N0 = Es./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
 
 for i = 1:length(sigma)
@@ -40,8 +40,8 @@ title('BER-SNR,AWGN');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %QPSK
-Eb = 1/2;%QPSK每个比特能量为1/2
-N0 = Eb./(power(10,SNR/10));
+Es = 1;%QPSK每个符号能量为1
+N0 = Es./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
 
 for i = 1:length(sigma)
