@@ -1,4 +1,0 @@
-function y = error_detection(a,S)
-for i = 1 : size(S,1)
-    if S(i,:) == [1 1 1]
-        a(i*)
