@@ -1,11 +1,11 @@
 clc;clear all;close all;
-N = 1000000;
+N = 10000000;
 s = source(N); %信源产生，序列个数为N
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %16QAM
 
-Es = (2*sqrt(2)+sqrt(10));%16QAM每个符号能量
+Es = 10;%16QAM每个符号能量
 mu = 0;
 SNR = -5 :1 :20;
 SER = zeros(1,length(SNR));
@@ -33,10 +33,15 @@ end
 
 
 semilogy(SNR,SER,'b*');
+axis([0 20 10^-6 1]);
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
 title('BER-SNR,AWGN');
+
+SER_true = 3*qfunc(sqrt(Es/5./N0)) - 9/4*(qfunc(sqrt(Es/5./N0)).^2); %16QAM理想误符号率
+semilogy(SNR,SER_true,'-m');
+hold on
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %QPSK
@@ -61,7 +66,11 @@ for i = 1:length(sigma)
     SER(i) = symbol_error_QPSK(s,y);        %%求误符号率
 end
 
-
 semilogy(SNR,SER,'rs');
 hold on;
-legend('16QAM','QPSK');
+
+SER_true = erfc(sqrt(Es./N0/2)); %QPSK理想误符号率
+semilogy(SNR,SER_true,'-y');
+hold on
+
+legend('16QAM simulated','16QAM theoretical','QPSK simulated','QPSK theoretical');

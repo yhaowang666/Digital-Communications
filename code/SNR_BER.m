@@ -1,5 +1,5 @@
 clc;clear all;close all;
-N = 1000000;
+N = 10000000;
 s = source(N); %信源产生，序列个数为N
 SNR = 0 : 1 : 15;
 

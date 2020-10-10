@@ -1,17 +1,16 @@
 clc;clear all;close all;
-N = 10000000;
+N = 100000;
 s = source(N); %信源产生，序列个数为N
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %16QAM
 
-Eb = 2.5;%16QAM每个比特能量
+Es = (2*sqrt(2)+sqrt(10))/2;%16QAM每个符号能量
 mu = 0;
-SNR = 0 :1 : 16;
-BER = zeros(1,length(SNR));
-N0 = Eb./(power(10,SNR/10));
+SNR = -5 :1 :20;
+SER = zeros(1,length(SNR));
+N0 = Es./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
-
 
 for i = 1:length(sigma)
     n = normrnd(mu,sigma(i),[2,N/4]);   %产生服从高斯分布的双路噪声
@@ -29,26 +28,25 @@ for i = 1:length(sigma)
     r_c = s_c + n_c;r_s = s_s + n_s;
     
     y = judgement_16QAM(r_c,r_s);     %%16QAM解码，判决输出
-    BER(i) = error_rate(s,y);        %%求误比特率
+    SER(i) = symbol_error_16QAM(s,y);        %%求误符号率
 end
 
 
-semilogy(SNR,BER,'b*');
-axis([0 16 10^-6 0.15]);
+semilogy(SNR,SER,'b*');
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
 title('BER-SNR,AWGN');
 
-BER_true = 1/4*(3*qfunc(sqrt(4/5*Eb./N0))+2*qfunc(3*sqrt(4/5*Eb./N0))+qfunc(5*sqrt(4/5*Eb./N0))); %16QAM理想误比特率
-semilogy(SNR,BER_true,'-m');
+%SER_true = 3*qfunc(sqrt(Es/5./N0)) - 9/4*(qfunc(sqrt(Es/5./N0).^2)); %16QAM理想误符号率
+SER_true = 3*qfunc(sqrt(Es/5./N0)) - 9/4*(qfunc(sqrt(Es/5./N0).^2));
+semilogy(SNR,SER_true,'-m');
 hold on
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %QPSK
-Eb = 1/2;%QPSK每个比特能量为1/2
-N0 = Eb./(power(10,SNR/10));
+Es = 1;%QPSK每个符号能量为1
+N0 = Es./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
 
 for i = 1:length(sigma)
@@ -65,16 +63,14 @@ for i = 1:length(sigma)
     r_c = s_c + n_c;r_s = s_s + n_s;
     
     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
-    BER(i) = error_rate(s,y);        %%求误比特率
+    SER(i) = symbol_error_QPSK(s,y);        %%求误符号率
 end
 
-
-semilogy(SNR,BER,'rs');
+semilogy(SNR,SER,'rs');
 hold on;
 
-BER_true = erfc(sqrt(Eb./N0))/2; %QPSK理想误比特率
-semilogy(SNR,BER_true,'-y');
+SER_true = erfc(sqrt(Es./N0/2)); %QPSK理想误符号率
+semilogy(SNR,SER_true,'-y');
 hold on
 
 legend('16QAM simulated','16QAM theoretical','QPSK simulated','QPSK theoretical');
-
