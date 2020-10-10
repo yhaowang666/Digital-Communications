@@ -7,10 +7,11 @@ s = source(N); %信源产生，序列个数为N
 
 Eb = (2*sqrt(2)+sqrt(10))/4;%16QAM每个比特能量
 mu = 0;
-SNR = -5 :1 : 20;
+SNR = 0 :1 : 16;
 BER = zeros(1,length(SNR));
 N0 = Eb./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
+
 
 for i = 1:length(sigma)
     n = normrnd(mu,sigma(i),[2,N/4]);   %产生服从高斯分布的双路噪声
@@ -32,11 +33,13 @@ for i = 1:length(sigma)
 end
 
 
-semilogy(SNR,BER,'-b*');
+semilogy(SNR,BER,'b*');
+axis([0 16 10^-6 0.15]);
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
 title('BER-SNR,AWGN');
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %QPSK
@@ -62,6 +65,12 @@ for i = 1:length(sigma)
 end
 
 
-semilogy(SNR,BER,'-rs');
+semilogy(SNR,BER,'rs');
 hold on;
-legend('16QAM','QPSK');
+
+BER_true = erfc(sqrt(Eb./N0))/2; %QPSK理想误比特率
+semilogy(SNR,BER_true,'-y');
+hold on
+
+legend('16QAM simulated','QPSK simulated','QPSK theoretical');
+

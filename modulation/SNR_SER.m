@@ -32,7 +32,7 @@ for i = 1:length(sigma)
 end
 
 
-semilogy(SNR,SER,'-b*');
+semilogy(SNR,SER,'b*');
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
@@ -62,6 +62,6 @@ for i = 1:length(sigma)
 end
 
 
-semilogy(SNR,SER,'-rs');
+semilogy(SNR,SER,'rs');
 hold on;
 legend('16QAM','QPSK');

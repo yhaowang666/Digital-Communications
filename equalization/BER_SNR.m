@@ -1,6 +1,7 @@
 clc;clear all;close all;
 N = 10000;
 s = source(N); %信源产生，序列个数为N
+h1 = [0.1 -0.3 0.6 0.8 1 -0.9 0.5 0.2];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %16QAM
@@ -54,7 +55,9 @@ for i = 1:length(sigma)
         s1_s(c) = s(2*c);
     end                     %将信源分解成双路信号
     
-    [s_c1,s_s1] = QPSK(s1_c,s1_s);     %进行QPSK编码
+    [s_i,s_q] = QPSK(s1_c,s1_s);     %进行QPSK编码
+    s_c1 = conv(h1,s_i);
+    s_s1 = conv(h1,s_q);             %经过多径信道
     
     h = normrnd(0,sqrt(1/2),2,N/2);              %产生瑞利乘性噪声
     h_i = h(1,:);h_q = h(2,:);
@@ -62,6 +65,13 @@ for i = 1:length(sigma)
     
     r_c = s_c + n_c;r_s = s_s + n_s;
     
+<<<<<<< HEAD
+    c = force_zero(h1 ,5);
+    r_c1 = conv(c,r_c);
+    r_s1 = conv(c,r_s);
+    
+    y = judgement_QPSK(r_c1,r_s1);     %%QPSK解码，判决输出
+=======
     h1 = normrnd(0,sqrt(1/2),1,7);
     h1 = h1 ./max(h1);
     n = 5; %抽头系数个数为2*n
@@ -69,6 +79,7 @@ for i = 1:length(sigma)
     r_c1 = conv(c,r_c);r_s1 = conv(c,r_s);
     y1 = judgement_QPSK(r_c1,r_s1);
     y = y1(1+2*n:N+2*n);%%QPSK解码，判决输出
+>>>>>>> 173678942031b74a40fda586441657e0665bc4a7
     BER(i) = error_rate(s,y);        %%求误比特率
 end
 
