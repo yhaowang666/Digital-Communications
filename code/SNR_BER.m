@@ -1,5 +1,5 @@
 clc;clear all;close all;
-N = 10000000;
+N = 1000000;
 s = source(N); %信源产生，序列个数为N
 SNR = 0 : 1 : 15;
 
@@ -31,8 +31,10 @@ for i = 1:length(sigma)
 end
 
 
-semilogy(SNR,BER,'-md');
+semilogy(SNR,BER,'-bd');
+axis([0 10 10^-5 0.15])
 hold on;
+grid on;
 
 
 
