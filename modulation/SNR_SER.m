@@ -1,4 +1,4 @@
-clc;clear all;close all;
+clc;clear all;
 N = 10000000;
 s = source(N); %信源产生，序列个数为N
 
@@ -31,7 +31,7 @@ for i = 1:length(sigma)
     SER(i) = symbol_error_16QAM(s,y);        %%求误符号率
 end
 
-
+figure(2)
 semilogy(SNR,SER,'b*');
 axis([0 20 10^-6 1]);
 hold on;
