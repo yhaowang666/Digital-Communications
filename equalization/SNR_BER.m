@@ -84,7 +84,7 @@ semilogy(SNR,BER,'b*');
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
-title('BER-SNR,AWGN');
+title('BER-SNR,Rayleigh');
 % 
 % BER_true = 1/4*(3*qfunc(sqrt(4/5*Eb./N0))+2*qfunc(3*sqrt(4/5*Eb./N0))+qfunc(5*sqrt(4/5*Eb./N0))); %16QAM理想误比特率
 % semilogy(SNR,BER_true,'-m');

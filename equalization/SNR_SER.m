@@ -65,7 +65,7 @@ semilogy(SNR,SER,'b*');
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
-title('BER-SNR,AWGN');
+title('BER-SNR,Rayleigh');
 
 % SER_true = 3*qfunc(sqrt(Es/5./N0)) - 9/4*(qfunc(sqrt(Es/5./N0)).^2); %16QAMÀíÏëÎó·ûºÅÂÊ
 % semilogy(SNR,SER_true,'-m');
