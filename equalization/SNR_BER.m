@@ -1,5 +1,5 @@
 clc;clear all;close all;
-N = 10000;
+N = 100000;
 s = source(N); %信源产生，序列个数为N
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,23 +27,50 @@ for i = 1:length(sigma)
     
     [s_c1,s_s1] = QAM(s1);     %进行16QAM编码
     
-    h1 = normrnd(0,sqrt(1/2),N/2,N/4);              %产生瑞利乘性噪声
-    h_i = h1(1:N/4,:);h_q = h1(N/4+1:N/2 ,:);
+%     h1 = normrnd(0,sqrt(1/2),N/2,N/4);              %产生瑞利乘性噪声
+%     h_i = h1(1:N/4,:);h_q = h1(N/4+1:N/2 ,:);
+%     H = h_i + 1i*h_q;
+%     s_r = H*(s_c1 + 1i*s_s1).';
+% 
+%     r1 = s_r + (n_c + 1i*n_s).';
+%     
+%     W = inv(H'*H)*(H');
+%     
+%     W1 = W*H;
+%     r_ZF = W * r1;             %均衡后输出信号
+%     r = zeros(1,N/2);
+%     for j= 1:size(r_ZF,1)
+%         r(j) = r_ZF(j,j);
+%     end
+    
+    h1 = normrnd(0,sqrt(1/2),40,N/4);              %产生瑞利乘性噪声
+    h_i = h1(1:20,:);h_q = h1(21:40 ,:);
     H = h_i + 1i*h_q;
-    s_r = H*(s_c1 + 1i*s_s1).';
+    S = (s_c1 + 1i*s_s1).';
+    
+    for j = 0 : N/80-1                %串并转换，每一列20bit，减小计算复杂度
+        s_r(20*j+1:20*(j+1)) = H(:,20*j+1:20*(j+1))*S(20*j+1:20*(j+1));
+    end
 
-    r1 = s_r + n_c + 1i*n_s;
+    r1 = s_r + (n_c + 1i*n_s).';
     
-    W = inv(H'*H)*(H');
-    
-    W1 = W*H;
-    r_ZF = W * r1;             %均衡后输出信号
-    r = zeros(1,N/2);
-    for j= 1:size(r_ZF,1)
-        r(j) = r_ZF(j,j);
+    W = zeros(20,N/4);
+    for j = 0 : N/80-1
+        h = H(:,20*j+1:20*(j+1));
+        W(:,20*j+1:20*(j+1)) = (h'*h)\h';
     end
     
-    r_c = real(r);r_s = imag(r);   
+    W1 = zeros(20,N/4);
+    for j = 0 : N/80-1
+        h = H(:,20*j+1:20*(j+1));
+        W1(:,20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*h;   %测试最终是否为单位矩阵
+    end
+    
+    r_ZF = zeros(1,N/4);
+    for j = 0 : N/80-1
+       r_ZF(20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*(r1(20*j+1:20*(j+1))).';   %均衡后输出信号
+    end
+    r_c = real(r_ZF);r_s = imag(r_ZF);  
     
     
     
@@ -87,18 +114,18 @@ for i = 1:length(sigma)
     H = h_i + 1i*h_q;
     s_r = H*(s_c + 1i*s_s).';
 
-    r1 = s_r + n_c + 1i*n_s;
+    r1 = s_r + (n_c + 1i*n_s).';
     
     W = inv(H'*H)*(H');
     
     W1 = W*H;
     r_ZF = W * r1;             %均衡后输出信号
-    r = zeros(1,N/2);
-    for j= 1:size(r_ZF,1)
-        r(j) = r_ZF(j,j);
-    end
-    
-    r_c = real(r);r_s = imag(r);
+%     r = zeros(1,N/2);
+%     for j= 1:size(r_ZF,1)
+%         r(j) = r_ZF(j,j);
+%     end
+%     
+    r_c = real(r_ZF);r_s = imag(r_ZF);
     
     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
     BER(i) = error_rate(s,y);        %%求误比特率

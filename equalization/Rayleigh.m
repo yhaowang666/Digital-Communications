@@ -45,7 +45,7 @@ N=1000;
 s = source(N); %信源产生，序列个数为N
 Eb = 1/2;
 mu = 0;
-SNR = 30;
+SNR = 15;
 N0 = Eb./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
 
@@ -96,19 +96,19 @@ for i =1:length(sigma)
     H = h_i + 1i*h_q;
     s_r = H*(s_c1 + 1i*s_s1).';
 
-    r1 = s_r + n_c + 1i*n_s;
+    r1 = s_r + (n_c + 1i*n_s).';
     
     W = inv(H'*H)*(H');
     
     W1 = W*H;
     r_ZF = W * r1;  
     r = zeros(1,N/2);
-    for j= 1:size(r_ZF,1)
-        r(j) = r_ZF(j,j);
-    end
+%     for j= 1:size(r_ZF,1)
+%         r(j) = r_ZF(j,j);
+%     end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
         
-    scatter(real(r),imag(r))
+    scatter(real(r_ZF),imag(r_ZF))
     xlabel('In-phase');
     ylabel('Quadrature-phase');
     title(sprintf('Rayleigh,SNR = %d',SNR(i)));

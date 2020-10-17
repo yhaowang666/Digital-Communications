@@ -1,5 +1,5 @@
 clc;clear all;close all
-N = 1000000;
+N = 1000;
 s = source(N); %信源产生，序列个数为N
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,7 +7,7 @@ s = source(N); %信源产生，序列个数为N
 
 Es = 10;%16QAM每个符号能量
 mu = 0;
-SNR = 0 : 5 :60;
+SNR = 0 :2 :30;
 SER = zeros(1,length(SNR));
 N0 = Es./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
@@ -26,34 +26,23 @@ for i = 1:length(sigma)
     
     [s_c,s_s] = QAM(s1);     %进行16QAM编码
     
-    h1 = normrnd(0,sqrt(1/2),40,N/4);              %产生瑞利乘性噪声
-    h_i = h1(1:20,:);h_q = h1(21:40 ,:);
+    h1 = normrnd(0,sqrt(1/2),N/2,N/4);              %产生瑞利乘性噪声
+    h_i = h1(1:N/4,:);h_q = h1(N/4+1:N/2 ,:);
     H = h_i + 1i*h_q;
-    S = (s_c + 1i*s_s).';
-    
-    for j = 0 : N/80-1                %串并转换，每一列20bit，减小计算复杂度
-        s_r(20*j+1:20*(j+1)) = H(:,20*j+1:20*(j+1))*S(20*j+1:20*(j+1));
-    end
+    s_r = H*(s_c + 1i*s_s).';
 
     r1 = s_r + n_c + 1i*n_s;
     
-    W = zeros(20,N/4);
-    for j = 0 : N/80-1
-        h = H(:,20*j+1:20*(j+1));
-        W(:,20*j+1:20*(j+1)) = (h'*h)\h';
+    W = inv(H'*H)*(H');
+    
+    W1 = W*H;
+    r_ZF = W * r1;             %均衡后输出信号
+    r = zeros(1,N/2);
+    for j= 1:size(r_ZF,1)
+        r(j) = r_ZF(j,j);
     end
     
-    W1 = zeros(20,N/4);
-    for j = 0 : N/80-1
-        h = H(:,20*j+1:20*(j+1));
-        W1(:,20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*h;   %测试最终是否为单位矩阵
-    end
-    
-    r_ZF = zeros(1,N/4);
-    for j = 0 : N/80-1
-       r_ZF(20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*(r1(20*j+1:20*(j+1))).';   %均衡后输出信号
-    end
-    r_c = real(r_ZF);r_s = imag(r_ZF);   
+    r_c = real(r);r_s = imag(r);   
     
     y = judgement_16QAM(r_c,r_s);     %%16QAM解码，判决输出
     SER(i) = symbol_error_16QAM(s,y);        %%求误符号率
@@ -104,36 +93,25 @@ for i = 1:length(sigma)
 %     
 %     r_c = real(r);r_s = imag(r);
 
-    h1 = normrnd(0,sqrt(1/2),40,N/2);              %产生瑞利乘性噪声
-    h_i = h1(1:20,:);h_q = h1(21:40 ,:);
+    h1 = normrnd(0,sqrt(1/2),N,N/2);              %产生瑞利乘性噪声
+    h_i = h1(1:N/2,:);h_q = h1(N/2+1:N ,:);
     H = h_i + 1i*h_q;
     S = (s_c + 1i*s_s).';
-    
-    for j = 0 : N/40-1                %串并转换，每一列20bit，减小计算复杂度
-        s_r(20*j+1:20*(j+1)) = H(:,20*j+1:20*(j+1))*S(20*j+1:20*(j+1));
-    end
-
+    s_r = H*S;
     r1 = s_r + n_c + 1i*n_s;
     
-    W = zeros(20,N/2);
-    for j = 0 : N/40-1
-        h = H(:,20*j+1:20*(j+1));
-        W(:,20*j+1:20*(j+1)) = (h'*h)\h';
+    W = inv(H'*H)*(H');
+    
+    W1 = W*H;
+    r_ZF = W * r1;             %均衡后输出信号
+    r = zeros(1,N/2);
+    for j= 1:size(r_ZF,1)
+        r(j) = r_ZF(j,j);
     end
     
-    W1 = zeros(20,N/2);
-    for j = 0 : N/40-1
-        h = H(:,20*j+1:20*(j+1));
-        W1(:,20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*h;   %测试最终是否为单位矩阵
-    end
-    
-    r_ZF = zeros(1,N/2);
-    for j = 0 : N/40-1
-       r_ZF(20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*(r1(20*j+1:20*(j+1))).';   %均衡后输出信号
-    end
-    
-    r_c = real(r_ZF);r_s = imag(r_ZF);
+    r_c = real(r);r_s = imag(r);
 
+    
     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
     SER(i) = symbol_error_QPSK(s,y);        %%求误符号率
 end
