@@ -71,7 +71,7 @@ for i = 1:length(sigma)
     r_s1 = conv(c,r_s);
     
     y = judgement_QPSK(r_c1,r_s1);     %%QPSK解码，判决输出
-=======
+
     h1 = normrnd(0,sqrt(1/2),1,7);
     h1 = h1 ./max(h1);
     n = 5; %抽头系数个数为2*n
@@ -79,7 +79,7 @@ for i = 1:length(sigma)
     r_c1 = conv(c,r_c);r_s1 = conv(c,r_s);
     y1 = judgement_QPSK(r_c1,r_s1);
     y = y1(1+2*n:N+2*n);%%QPSK解码，判决输出
->>>>>>> 173678942031b74a40fda586441657e0665bc4a7
+
     BER(i) = error_rate(s,y);        %%求误比特率
 end
 
