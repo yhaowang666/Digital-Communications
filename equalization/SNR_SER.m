@@ -26,18 +26,21 @@ for i = 1:length(sigma)
     
     [s_c,s_s] = QAM(s1);     %进行16QAM编码
     
-    h = normrnd(0,sqrt(1/2),2,N/4);              %产生瑞利乘性噪声
-    h_i = h(1,:);h_q = h(2,:);
+    h1 = normrnd(0,sqrt(1/2),N/2,N/4);              %产生瑞利乘性噪声
+    h_i = h1(1:N/4,:);h_q = h1(N/4+1:N/2 ,:);
+    H = h_i + 1i*h_q;
+    s_r = H*(s_c1 + 1i*s_s1).';
+
+    r1 = s_r + n_c + 1i*n_s;
     
-    H = h_i + 1i*h_q;     
-    W = inv(H'*H )*(H');   %迫零均衡
-    n_ZF = W * (n_c + 1i*n_s);  
-    n = zeros(1,N/4);
-    for j= 1:size(n_ZF,1)
-        n(j) = n_ZF(j,j);
+    W = inv(H'*H)*(H');
+    
+    W1 = W*H;
+    r_ZF = W * r1;             %均衡后输出信号
+    r = zeros(1,N/2);
+    for j= 1:size(r_ZF,1)
+        r(j) = r_ZF(j,j);
     end
-    
-    r = s_c + 1i*s_s + n;            %均衡后输出信号
     
     r_c = real(r);r_s = imag(r);   
     
@@ -75,20 +78,39 @@ for i = 1:length(sigma)
     
     [s_c,s_s] = QPSK(s1_c,s1_s);     %进行QPSK编码
 
-    h = normrnd(0,sqrt(1/2),2,N/2);              %产生瑞利乘性噪声
-    h_i = h(1,:);h_q = h(2,:);
+%     h = normrnd(0,sqrt(1/2),2,N/2);              %产生瑞利乘性噪声
+%     h_i = h(1,:);h_q = h(2,:);
+%     
+%     H = h_i + 1i*h_q;     
+%     W = inv(H'*H )*(H');   %迫零均衡
+%     n_ZF = W * (n_c + 1i*n_s);  
+%     n = zeros(1,N/2);
+%     for j= 1:size(n_ZF,1)
+%         n(j) = n_ZF(j,j);
+%     end
+%     
+%     r = s_c + 1i*s_s + n;            %均衡后输出信号
+%     
+%     r_c = real(r);r_s = imag(r);
+
+    h1 = normrnd(0,sqrt(1/2),N,N/2);              %产生瑞利乘性噪声
+    h_i = h1(1:N/2,:);h_q = h1(N/2+1:N ,:);
+    H = h_i + 1i*h_q;
+    s_r = H*(s_c + 1i*s_s).';
+
+    r1 = s_r + n_c + 1i*n_s;
     
-    H = h_i + 1i*h_q;     
-    W = inv(H'*H )*(H');   %迫零均衡
-    n_ZF = W * (n_c + 1i*n_s);  
-    n = zeros(1,N/2);
-    for j= 1:size(n_ZF,1)
-        n(j) = n_ZF(j,j);
+    W = inv(H'*H)*(H');
+    
+    W1 = W*H;
+    r_ZF = W * r1;             %均衡后输出信号
+    r = zeros(1,N/2);
+    for j= 1:size(r_ZF,1)
+        r(j) = r_ZF(j,j);
     end
     
-    r = s_c + 1i*s_s + n;            %均衡后输出信号
-    
     r_c = real(r);r_s = imag(r);
+
     
     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
     SER(i) = symbol_error_QPSK(s,y);        %%求误符号率
