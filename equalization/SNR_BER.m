@@ -1,5 +1,5 @@
 clc;clear all;close all;
-N = 1000000;
+N = 10000000;
 s = source(N); %信源产生，序列个数为N
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,7 +7,7 @@ s = source(N); %信源产生，序列个数为N
 
 Eb = 2.5;%16QAM每个比特能量
 mu = 0;
-SNR = 0 : 5 : 50;
+SNR = 0 : 5 : 70;
 BER = zeros(1,length(SNR));
 N0 = Eb./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
@@ -80,15 +80,16 @@ end
 
 
 semilogy(SNR,BER,'b*');
-%axis([0 16 10^-6 0.15]);
+axis([0 60 10^-6 1]);
 hold on;
 grid on;
 xlabel('SNR/dB');ylabel('BER');
 title('BER-SNR,Rayleigh');
-% 
-% BER_true = 1/4*(3*qfunc(sqrt(4/5*Eb./N0))+2*qfunc(3*sqrt(4/5*Eb./N0))+qfunc(5*sqrt(4/5*Eb./N0))); %16QAM理想误比特率
-% semilogy(SNR,BER_true,'-m');
-% hold on
+
+r = 4*Eb./N0;
+BER_true = (3/2*(1 - sqrt(r./(10 + r))) - 9/16*(1 - sqrt(r./(10 + r)).*(4/pi*atan(sqrt((10+r)./r)))))/4; %16QAM理想误比特率
+semilogy(SNR,BER_true,'-m');
+hold on
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -147,9 +148,10 @@ end
 semilogy(SNR,BER,'rs');
 hold on;
 
-% BER_true = erfc(sqrt(Eb./N0))/2; %QPSK理想误比特率
-% semilogy(SNR,BER_true,'-y');
-% hold on
+r = 2*Eb./N0;
+BER_true = (1 - sqrt(r./(2 + r)) - 1/4*(1 - sqrt(r./(2 + r)).*(4/pi*atan(sqrt((2+r)./r)))))/2;%QPSK理想误比特率
+semilogy(SNR,BER_true,'-y');
+hold on
 
-%legend('16QAM simulated','16QAM theoretical','QPSK simulated','QPSK theoretical');
+legend('16QAM simulated','16QAM theoretical','QPSK simulated','QPSK theoretical');
 
