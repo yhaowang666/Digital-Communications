@@ -13,7 +13,6 @@ for i =1:length(sigma)
     n = normrnd(mu,sigma(i),2,N/2);   %产生服从高斯分布的双路噪声
     n_c=n(1,:);n_s=n(2,:);
     s1_c=zeros(1,N/2);s1_s=zeros(1,N/2);
-
     for c=1:N/2
         s1_c(c)=s(2*c-1);
         s1_s(c)=s(2*c);
@@ -24,11 +23,18 @@ for i =1:length(sigma)
 
     h = normrnd(0,sqrt(1/2),2,N/2);              %产生瑞利乘性噪声
     h_i = h(1,:);h_q = h(2,:);
-    s_c = s_c1.*h_i - s_s1.*h_q ;s_s = s_c1.*h_q + s_s1.*h_i;
     
-    r_c = s_c  + n_c;r_s = s_s + n_s;
+    s_r = (s_c1 + 1i*s_s1).*(h_i + 1i*h_q);
+    %s_c = s_c1.*h_i - s_s1.*h_q ;s_s = s_c1.*h_q + s_s1.*h_i;
+    
+    %r_c1 = s_c  + n_c;r_s1 = s_s + n_s;
+    r_n = s_r + n_c + 1i*n_s;
+    
+    r = (h_i -1i*h_q).* r_n;
+    
     figure(i+4)
-    scatter(r_c,r_s)
+    %scatter(r_n)
+    scatter(real(r),imag(r))
     xlabel('In-phase');
     ylabel('Quadrature-phase');
     title(sprintf('Rayleigh,SNR = %d',SNR(i)));
