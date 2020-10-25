@@ -10,11 +10,11 @@ for i=1:N
     if a==e
         y_c(i)=0;y_s(i)=0;
     else if b==e
-            y_c(i)=0;y_s(i)=1;
+            y_c(i)=1;y_s(i)=0;
         else if c==e
                 y_c(i)=1;y_s(i)=1;
             else
-                y_c(i)=1;y_s(i)=0;
+                y_c(i)=0;y_s(i)=1;
             end
         end
     end
