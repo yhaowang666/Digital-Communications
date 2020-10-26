@@ -1,7 +1,7 @@
 clc;clear all;close all;
 N = 10000000;
 s = source(N); %信源产生，序列个数为N
-SNR = -5 : 1 : 12;
+SNR = 0 : 1 : 12;
 
 s1 = hamming_encoding(s);  %(7,4)汉明编码
 N1 = length(s1);
@@ -40,6 +40,9 @@ grid on;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %QPSK 硬判决
+Eb = 7/8;%编码后QPSK每个比特能量为1/2，则编码前为7/8
+N0 = Eb./(power(10,SNR/10));
+sigma = sqrt(N0/2); %计算噪声的标准差
 for i = 1:length(sigma)
     n = normrnd(mu,sigma(i),[2,N1/2]);   %产生服从高斯分布的双路噪声
     n_c = n(1,:);n_s = n(2,:);
