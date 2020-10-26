@@ -1,7 +1,7 @@
 clc;clear all;close all;
 N = 10000000;
 s = source(N); %信源产生，序列个数为N
-SNR = 0 : 1 : 12;
+SNR = 0 : 1 : 15;
 
 s1 = hamming_encoding(s);  %(7,4)汉明编码
 N1 = length(s1);
@@ -33,6 +33,8 @@ end
 
 semilogy(SNR,BER,'-bd');
 ylim([ 10^-6, 1])
+xlabel('SNR/dB');ylabel('BER');
+title('SNR-BER,AWGN');
 hold on;
 grid on;
 
@@ -111,21 +113,6 @@ end
 
 semilogy(SNR,BER,'-kp');
 hold on;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 legend('Uncoded','Hard decision','Soft decision');
 
