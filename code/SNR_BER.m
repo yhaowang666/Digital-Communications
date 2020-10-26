@@ -32,7 +32,7 @@ end
 
 
 semilogy(SNR,BER,'-bd');
-axis([0 12 10^-6 1])
+ylim([ 10^-6, 1])
 hold on;
 grid on;
 
