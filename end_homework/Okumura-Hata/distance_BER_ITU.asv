@@ -1,7 +1,8 @@
 clc;clear all;close all;
 N = 10000000;
 s = source(N); %信源产生，序列个数为N
-SNR = 10 : 10 : 90;
+d = 2 : -0.2 : 0.1;
+SNR = 100;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 f_c = 1500;%单位为MHZ
@@ -48,8 +49,8 @@ BER = zeros(1,length(SNR));
 N0 = Eb./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
 
-for i = 1:length(sigma)
-    n = normrnd(mu,sigma(i),[2,N/4]);   %产生服从高斯分布的双路噪声
+for i = 1:length(d)
+    n = normrnd(mu,sigma,[2,N/4]);   %产生服从高斯分布的双路噪声
     n_c = n(1,:);n_s = n(2,:);
     s1 = zeros(4,N/4);
 
@@ -62,7 +63,7 @@ for i = 1:length(sigma)
     
     [s_c1,s_s1] = QAM(s1);     %进行16QAM编码
     
-    h1 = normrnd(0,sqrt(1/(2*EL)),40,N/4);              %产生瑞利乘性噪声
+    h1 = normrnd(0,sqrt(1/(2*EL(i))),40,N/4);              %产生瑞利乘性噪声
     h_i = h1(1:20,:);h_q = h1(21:40 ,:);
     H = h_i + 1i*h_q;
     S = (s_c1 + 1i*s_s1).';
@@ -89,16 +90,16 @@ for i = 1:length(sigma)
     BER(i) = error_rate(s,y);         %%求误比特率
 end
 
-semilogy(SNR,BER,'-md');
+semilogy(d.*1000,BER,'-md');
 %axis([0 60 10^-6 1]);
 hold on;
 grid on;
-xlabel('SNR/dB');ylabel('BER');
-title({'BER-SNR,Okumura-Hata';['rural area,distance=',num2str(d),'f_c=',num2str(f_c)]});
+xlabel('distance/m');ylabel('BER');
+title(['BER-disntance,SNR =',num2str(SNR),' dB,ITU-R models']);
 
 % %无路径衰落
-% for i = 1:length(sigma)
-%     n = normrnd(mu,sigma(i),[2,N/4]);   %产生服从高斯分布的双路噪声
+% for i = 1:length(d)
+%     n = normrnd(mu,sigma,[2,N/4]);   %产生服从高斯分布的双路噪声
 %     n_c = n(1,:);n_s = n(2,:);
 %     s1 = zeros(4,N/4);
 % 
@@ -137,7 +138,7 @@ title({'BER-SNR,Okumura-Hata';['rural area,distance=',num2str(d),'f_c=',num2str(
 %     y = judgement_16QAM(r_c,r_s);     %%16QAM解码，判决输出
 %     BER(i) = error_rate(s,y);         %%求误比特率
 % end
-% semilogy(SNR,BER,'--md');
+% semilogy(d,BER,'--m');
 % hold on;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -147,8 +148,8 @@ Eb = 1/2;%QPSK每个比特能量为1/2
 N0 = Eb./(power(10,SNR/10));
 sigma = sqrt(N0/2); %计算噪声的标准差
 
-for i = 1:length(sigma)
-    n = normrnd(mu,sigma(i),[2,N/2]);   %产生服从高斯分布的双路噪声
+for i = 1:length(d)
+    n = normrnd(mu,sigma,[2,N/2]);   %产生服从高斯分布的双路噪声
     n_c = n(1,:);n_s = n(2,:);
     s1_c = zeros(1,N/2);s1_s = zeros(1,N/2);
 
@@ -159,7 +160,7 @@ for i = 1:length(sigma)
     
     [s_c,s_s] = QPSK(s1_c,s1_s);     %进行QPSK编码
     
-    h1 = normrnd(0,sqrt(1/(2*EL)),40,N/2);              %产生瑞利乘性噪声
+    h1 = normrnd(0,sqrt(1/(2*EL(i))),40,N/2);              %产生瑞利乘性噪声
     h_i = h1(1:20,:);h_q = h1(21:40 ,:);
     H = h_i + 1i*h_q;
     S = (s_c + 1i*s_s).';
@@ -186,12 +187,12 @@ for i = 1:length(sigma)
     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
     BER(i) = error_rate(s,y);        %%求误比特率
 end
-semilogy(SNR,BER,'-gs');
+semilogy(d * 1000,BER,'-gs');
 hold on;
 
 % %无路径衰落
-% for i = 1:length(sigma)
-%     n = normrnd(mu,sigma(i),[2,N/2]);   %产生服从高斯分布的双路噪声
+% for i = 1:length(d)
+%     n = normrnd(mu,sigma,[2,N/2]);   %产生服从高斯分布的双路噪声
 %     n_c = n(1,:);n_s = n(2,:);
 %     s1_c = zeros(1,N/2);s1_s = zeros(1,N/2);
 % 
@@ -229,7 +230,7 @@ hold on;
 %     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
 %     BER(i) = error_rate(s,y);        %%求误比特率
 % end
-% semilogy(SNR,BER,'--gs');
+% semilogy(SNR,BER,'--g');
 % hold on;
 
 legend('16QAM-PL','QPSK-PL');
