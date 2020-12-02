@@ -1,0 +1,236 @@
+clc;clear all;close all;
+N = 1000000;
+s = source(N); %信源产生，序列个数为N
+SNR = 10 : 10 : 90;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+f_c = 1500;%单位为MHZ
+d = 4;%单位为km 
+h_b = 200;%单位为m 
+h_m = 3; %单位为m 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Okumura-Hata模型（载波范围为150MHZ—1500MHZ）
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%中小型城市
+% a = (1.1*log(f_c) - 0.7)*h_m - (1.56*log(f_c) - 0.8);
+% C = 0;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %大都市区
+% for i = 1:length(f_c)
+%     if(f_c(i) < 300)
+%         a(i) = 8.29*(log(1.54*h_m))^2 - 1.1;
+%     else
+%         a(i) = 3.2*(log(11.75*h_m))^2 -4.97;
+%     end
+% end
+% C = 0; 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %郊区环境
+% a = (1.1*log(f_c) - 0.7)*h_m - (1.56*log(f_c) - 0.8);
+% C = -2*(log(f_c/28)).^2 - 5.4;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %农村
+a = (1.1*log(f_c) - 0.7)*h_m - (1.56*log(f_c) - 0.8);
+C = -4.78*(log(f_c)).^2 + 18.33*log(f_c) - 40.98;
+A = 69.55 + 26.16*log(f_c) - 13.82*log(h_b) - a;
+B = 44.9 - 6.55*log(h_b);
+PL = A + B*log(d) + C;
+
+EL = power(10,PL/10);    %能量损耗，产生瑞利乘性噪声方差变为以前的1/EL
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%
+%16QAM
+%有路径衰落
+Eb = 2.5;%16QAM每个比特能量
+mu = 0;
+BER = zeros(1,length(SNR));
+N0 = Eb./(power(10,SNR/10));
+sigma = sqrt(N0/2); %计算噪声的标准差
+
+for i = 1:length(sigma)
+    n = normrnd(mu,sigma(i),[2,N/4]);   %产生服从高斯分布的双路噪声
+    n_c = n(1,:);n_s = n(2,:);
+    s1 = zeros(4,N/4);
+
+    for c = 1:N/4
+        s1(1,c) = s(4*c-3);
+        s1(2,c) = s(4*c-2);
+        s1(3,c) = s(4*c-1);
+        s1(4,c) = s(4*c);
+    end                     %将信源分解成四路信号
+    
+    [s_c1,s_s1] = QAM(s1);     %进行16QAM编码
+    
+    h1 = normrnd(0,sqrt(1/(2*EL)),40,N/4);              %产生瑞利乘性噪声
+    h_i = h1(1:20,:);h_q = h1(21:40 ,:);
+    H = h_i + 1i*h_q;
+    S = (s_c1 + 1i*s_s1).';
+    
+    for j = 0 : N/80-1                %串并转换，每一列20bit，减小计算复杂度
+        s_r(20*j+1:20*(j+1)) = H(:,20*j+1:20*(j+1))*S(20*j+1:20*(j+1));
+    end
+
+    r1 = s_r + n_c + 1i*n_s;
+    
+    W = zeros(20,N/4);
+    for j = 0 : N/80-1
+        h = H(:,20*j+1:20*(j+1));
+        W(:,20*j+1:20*(j+1)) = (h'*h)\h';
+    end
+    
+    r_ZF = zeros(1,N/4);
+    for j = 0 : N/80-1
+       r_ZF(20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*(r1(20*j+1:20*(j+1))).';   %均衡后输出信号
+    end
+    r_c = real(r_ZF);r_s = imag(r_ZF);  
+    
+    y = judgement_16QAM(r_c,r_s);     %%16QAM解码，判决输出
+    BER(i) = error_rate(s,y);         %%求误比特率
+end
+
+semilogy(SNR,BER,'-md');
+%axis([0 60 10^-6 1]);
+hold on;
+grid on;
+xlabel('SNR/dB');ylabel('BER');
+title({'BER-SNR,ITU-R models';['Indoor,distance=',num2str(d),'f_c=',num2str(f_c)]});
+
+% %无路径衰落
+% for i = 1:length(sigma)
+%     n = normrnd(mu,sigma(i),[2,N/4]);   %产生服从高斯分布的双路噪声
+%     n_c = n(1,:);n_s = n(2,:);
+%     s1 = zeros(4,N/4);
+% 
+%     for c = 1:N/4
+%         s1(1,c) = s(4*c-3);
+%         s1(2,c) = s(4*c-2);
+%         s1(3,c) = s(4*c-1);
+%         s1(4,c) = s(4*c);
+%     end                     %将信源分解成四路信号
+%     
+%     [s_c1,s_s1] = QAM(s1);     %进行16QAM编码
+%     
+%     h1 = normrnd(0,sqrt(1/2),40,N/4);              %产生瑞利乘性噪声
+%     h_i = h1(1:20,:);h_q = h1(21:40 ,:);
+%     H = h_i + 1i*h_q;
+%     S = (s_c1 + 1i*s_s1).';
+%     
+%     for j = 0 : N/80-1                %串并转换，每一列20bit，减小计算复杂度
+%         s_r(20*j+1:20*(j+1)) = H(:,20*j+1:20*(j+1))*S(20*j+1:20*(j+1));
+%     end
+% 
+%     r1 = s_r + n_c + 1i*n_s;
+%     
+%     W = zeros(20,N/4);
+%     for j = 0 : N/80-1
+%         h = H(:,20*j+1:20*(j+1));
+%         W(:,20*j+1:20*(j+1)) = (h'*h)\h';
+%     end
+%     
+%     r_ZF = zeros(1,N/4);
+%     for j = 0 : N/80-1
+%        r_ZF(20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*(r1(20*j+1:20*(j+1))).';   %均衡后输出信号
+%     end
+%     r_c = real(r_ZF);r_s = imag(r_ZF);  
+%     
+%     y = judgement_16QAM(r_c,r_s);     %%16QAM解码，判决输出
+%     BER(i) = error_rate(s,y);         %%求误比特率
+% end
+% semilogy(SNR,BER,'--md');
+% hold on;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%QPSK
+%有路径衰落
+Eb = 1/2;%QPSK每个比特能量为1/2
+N0 = Eb./(power(10,SNR/10));
+sigma = sqrt(N0/2); %计算噪声的标准差
+
+for i = 1:length(sigma)
+    n = normrnd(mu,sigma(i),[2,N/2]);   %产生服从高斯分布的双路噪声
+    n_c = n(1,:);n_s = n(2,:);
+    s1_c = zeros(1,N/2);s1_s = zeros(1,N/2);
+
+    for c = 1:N/2
+        s1_c(c) = s(2*c-1);
+        s1_s(c) = s(2*c);
+    end                     %将信源分解成双路信号
+    
+    [s_c,s_s] = QPSK(s1_c,s1_s);     %进行QPSK编码
+    
+    h1 = normrnd(0,sqrt(1/(2*EL)),40,N/2);              %产生瑞利乘性噪声
+    h_i = h1(1:20,:);h_q = h1(21:40 ,:);
+    H = h_i + 1i*h_q;
+    S = (s_c + 1i*s_s).';
+    
+    for j = 0 : N/40-1                %串并转换，每一列20bit，减小计算复杂度
+        s_r(20*j+1:20*(j+1)) = H(:,20*j+1:20*(j+1))*S(20*j+1:20*(j+1));
+    end
+
+    r1 = s_r + n_c + 1i*n_s;
+    
+    W = zeros(20,N/2);
+    for j = 0 : N/40-1
+        h = H(:,20*j+1:20*(j+1));
+        W(:,20*j+1:20*(j+1)) = (h'*h)\h';
+    end
+    
+    r_ZF = zeros(1,N/2);
+    for j = 0 : N/40-1
+       r_ZF(20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*(r1(20*j+1:20*(j+1))).';   %均衡后输出信号
+    end
+    
+    r_c = real(r_ZF);r_s = imag(r_ZF);
+    
+    y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
+    BER(i) = error_rate(s,y);        %%求误比特率
+end
+semilogy(SNR,BER,'-gs');
+hold on;
+
+% %无路径衰落
+% for i = 1:length(sigma)
+%     n = normrnd(mu,sigma(i),[2,N/2]);   %产生服从高斯分布的双路噪声
+%     n_c = n(1,:);n_s = n(2,:);
+%     s1_c = zeros(1,N/2);s1_s = zeros(1,N/2);
+% 
+%     for c = 1:N/2
+%         s1_c(c) = s(2*c-1);
+%         s1_s(c) = s(2*c);
+%     end                     %将信源分解成双路信号
+%     
+%     [s_c,s_s] = QPSK(s1_c,s1_s);     %进行QPSK编码
+%     
+%     h1 = normrnd(0,sqrt(1/2),40,N/2);              %产生瑞利乘性噪声
+%     h_i = h1(1:20,:);h_q = h1(21:40 ,:);
+%     H = h_i + 1i*h_q;
+%     S = (s_c + 1i*s_s).';
+%     
+%     for j = 0 : N/40-1                %串并转换，每一列20bit，减小计算复杂度
+%         s_r(20*j+1:20*(j+1)) = H(:,20*j+1:20*(j+1))*S(20*j+1:20*(j+1));
+%     end
+% 
+%     r1 = s_r + n_c + 1i*n_s;
+%     
+%     W = zeros(20,N/2);
+%     for j = 0 : N/40-1
+%         h = H(:,20*j+1:20*(j+1));
+%         W(:,20*j+1:20*(j+1)) = (h'*h)\h';
+%     end
+%     
+%     r_ZF = zeros(1,N/2);
+%     for j = 0 : N/40-1
+%        r_ZF(20*j+1:20*(j+1)) = W(:,20*j+1:20*(j+1))*(r1(20*j+1:20*(j+1))).';   %均衡后输出信号
+%     end
+%     
+%     r_c = real(r_ZF);r_s = imag(r_ZF);
+%     
+%     y = judgement_QPSK(r_c,r_s);     %%QPSK解码，判决输出
+%     BER(i) = error_rate(s,y);        %%求误比特率
+% end
+% semilogy(SNR,BER,'--gs');
+% hold on;
+
+legend('16QAM-PL','QPSK-PL');
+
